@@ -59,7 +59,7 @@ const SCIENCE_TOPICS = {
 };
 
 /* ===== Gemini API Config ===== */
-const TEXT_MODEL = "gemini-2.0-flash-lite";
+const TEXT_MODEL = "gemini-3.1-flash-lite-preview";
 const IMAGE_MODEL = "gemini-3.1-flash-image-preview";
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
