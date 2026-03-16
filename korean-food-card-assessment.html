@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한국 전통 음식 소개 카드 만들기 - 디지털 리터러시 수행평가</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  background: #eef3f9;
+  color: #2c3e50;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
+  color: #fff;
+  padding: 18px 28px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.header h1 { font-size: 1.25rem; font-weight: 700; }
+.header p { font-size: .85rem; opacity: .9; margin-top: 4px; }
+
+/* Main layout */
+.main-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+/* Panels */
+.left-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.right-panel {
+  flex: 1;
+  min-width: 0;
+  position: sticky;
+  top: 20px;
+}
+
+/* Step cards */
+.step-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.07);
+  overflow: hidden;
+  border: 1px solid #dce6f0;
+  transition: box-shadow .2s;
+}
+.step-card.active { box-shadow: 0 3px 14px rgba(74,144,217,.18); border-color: #a3c4e8; }
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  user-select: none;
+  background: #f7fafd;
+  border-bottom: 1px solid #e8eff6;
+  transition: background .2s;
+}
+.step-header:hover { background: #edf3fa; }
+.step-badge {
+  background: #4a90d9;
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.step-badge.done { background: #27ae60; }
+.step-title { font-size: .95rem; font-weight: 600; flex: 1; }
+.step-chevron {
+  font-size: 1.1rem;
+  transition: transform .25s;
+  color: #7f9bb8;
+}
+.step-card.open .step-chevron { transform: rotate(180deg); }
+.step-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .35s ease, padding .35s ease;
+  padding: 0 18px;
+}
+.step-card.open .step-body {
+  max-height: 800px;
+  padding: 16px 18px 20px;
+}
+
+/* Form elements */
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #4a6785;
+  margin-bottom: 5px;
+}
+.field select, .field input[type="text"] {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #d0dbe8;
+  border-radius: 8px;
+  font-size: .88rem;
+  background: #fff;
+  color: #2c3e50;
+  transition: border-color .2s;
+  appearance: auto;
+}
+.field select:focus { border-color: #4a90d9; outline: none; }
+
+/* Checkboxes */
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .85rem;
+  font-weight: 400;
+  color: #2c3e50;
+  background: #f0f5fb;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  border: 1.5px solid #dce6f0;
+  transition: all .2s;
+  user-select: none;
+}
+.checkbox-group label:hover { background: #e0ebf7; }
+.checkbox-group input:checked + span { color: #4a90d9; font-weight: 600; }
+.checkbox-group label:has(input:checked) { border-color: #4a90d9; background: #e8f0fb; }
+.checkbox-group input { accent-color: #4a90d9; }
+
+/* Radio group */
+.radio-group { display: flex; flex-direction: column; gap: 8px; }
+.radio-group label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: .85rem;
+  font-weight: 400;
+  color: #2c3e50;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1.5px solid #dce6f0;
+  background: #f7fafd;
+  transition: all .2s;
+  user-select: none;
+}
+.radio-group label:hover { background: #edf3fa; }
+.radio-group label:has(input:checked) { border-color: #4a90d9; background: #e8f0fb; }
+.radio-group input { accent-color: #4a90d9; margin-top: 2px; }
+
+/* Generate button */
+.btn-generate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #4a90d9, #357abd);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: .95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .2s;
+  margin-bottom: 16px;
+}
+.btn-generate:hover { opacity: .9; }
+.btn-generate:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Loading spinner */
+.spinner {
+  display: none;
+  width: 18px; height: 18px;
+  border: 2.5px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-generate.loading .spinner { display: inline-block; }
+.btn-generate.loading .btn-text { display: none; }
+
+/* Generated text area */
+.generated-text-area {
+  display: none;
+  background: #f7fafd;
+  border: 1.5px solid #d0dbe8;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: .9rem;
+  line-height: 1.8;
+  color: #2c3e50;
+}
+.generated-text-area.visible { display: block; }
+
+/* Underline words */
+.underline-slot {
+  text-decoration: underline wavy #e67e22;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  position: relative;
+  color: #c0392b;
+  font-weight: 500;
+  padding: 1px 2px;
+  border-radius: 3px;
+  transition: background .2s;
+}
+.underline-slot:hover { background: #fdf2e9; }
+.underline-slot.selected { color: #27ae60; text-decoration: underline solid #27ae60; }
+
+/* Dropdown popup for underline */
+.ul-dropdown {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  background: #fff;
+  border: 1.5px solid #d0dbe8;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.13);
+  z-index: 100;
+  min-width: 240px;
+  overflow: hidden;
+}
+.ul-dropdown.show { display: block; }
+.ul-dropdown-item {
+  padding: 10px 14px;
+  font-size: .85rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.ul-dropdown-item:last-child { border-bottom: none; }
+.ul-dropdown-item:hover { background: #e8f0fb; }
+.ul-dropdown-item.active { background: #e8f0fb; color: #4a90d9; font-weight: 600; }
+
+/* Preview panel */
+.preview-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.07);
+  border: 1px solid #dce6f0;
+  overflow: hidden;
+}
+.preview-header {
+  background: #f7fafd;
+  padding: 12px 18px;
+  border-bottom: 1px solid #e8eff6;
+  font-size: .9rem;
+  font-weight: 600;
+  color: #4a6785;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.preview-body {
+  padding: 20px;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card preview */
+.card-preview {
+  width: 100%;
+  max-width: 380px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,.1);
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  transition: all .3s;
+}
+
+/* Layout: top image + bottom text */
+.card-preview.layout-top .card-image-section { width: 100%; }
+.card-preview.layout-top .card-text-section { width: 100%; padding: 16px; }
+
+/* Layout: left-right split */
+.card-preview.layout-lr { display: flex; }
+.card-preview.layout-lr .card-image-section { width: 50%; min-height: 200px; }
+.card-preview.layout-lr .card-text-section { width: 50%; padding: 14px; }
+
+/* Layout: overlay */
+.card-preview.layout-overlay { position: relative; }
+.card-preview.layout-overlay .card-image-section { width: 100%; min-height: 320px; }
+.card-preview.layout-overlay .card-text-section {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,.55);
+  color: #fff !important;
+  padding: 16px;
+  backdrop-filter: blur(2px);
+}
+.card-preview.layout-overlay .card-text-section .card-title,
+.card-preview.layout-overlay .card-text-section .card-body { color: #fff !important; }
+
+/* Card image */
+.card-image-section {
+  background: #f0f5fb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 8px;
+  min-height: 160px;
+  transition: background .3s;
+}
+.card-image-section.bg-white { background: #f9f9f9; }
+.card-image-section.bg-hanok { background: linear-gradient(135deg, #d4a574 0%, #c4956a 50%, #b8a08a 100%); }
+.card-image-section.bg-table { background: linear-gradient(135deg, #8B7355 0%, #A0845C 50%, #C4A77D 100%); }
+
+.food-emoji { font-size: 4rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,.1)); }
+.style-label {
+  font-size: .75rem;
+  background: rgba(255,255,255,.85);
+  padding: 3px 10px;
+  border-radius: 12px;
+  color: #555;
+  font-weight: 500;
+}
+
+/* Card text */
+.card-title {
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  transition: font-size .2s;
+}
+.card-body {
+  color: #555;
+  transition: font-size .2s;
+}
+.card-title.fs-sm { font-size: .9rem; }
+.card-title.fs-md { font-size: 1.1rem; }
+.card-title.fs-lg { font-size: 1.3rem; }
+.card-body.fs-sm { font-size: .75rem; line-height: 1.5; }
+.card-body.fs-md { font-size: .85rem; line-height: 1.6; }
+.card-body.fs-lg { font-size: .95rem; line-height: 1.7; }
+
+/* Placeholder */
+.preview-placeholder {
+  text-align: center;
+  color: #a0b4c8;
+  font-size: .9rem;
+}
+.preview-placeholder .icon { font-size: 3rem; margin-bottom: 8px; }
+
+/* Submit */
+.submit-bar {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: flex-end;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.btn-submit {
+  padding: 12px 36px;
+  background: linear-gradient(135deg, #27ae60, #219a52);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .2s;
+  box-shadow: 0 2px 8px rgba(39,174,96,.25);
+}
+.btn-submit:hover { opacity: .9; }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0,0,0,.2);
+  overflow: hidden;
+  animation: modalIn .3s ease;
+}
+@keyframes modalIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-header {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #4a90d9, #357abd);
+  color: #fff;
+  text-align: center;
+}
+.modal-header h2 { font-size: 1.15rem; }
+.modal-score {
+  text-align: center;
+  padding: 24px;
+}
+.modal-score .score-number {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #4a90d9;
+}
+.modal-score .score-total { font-size: 1.1rem; color: #7f9bb8; }
+.modal-details { padding: 0 24px 20px; }
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f4f8;
+  font-size: .88rem;
+}
+.score-row:last-child { border-bottom: none; }
+.score-row .label { color: #4a6785; }
+.score-row .result { font-weight: 600; }
+.score-row .result.correct { color: #27ae60; }
+.score-row .result.wrong { color: #e74c3c; }
+.modal-footer { padding: 16px 24px; text-align: center; border-top: 1px solid #eee; }
+.btn-close-modal {
+  padding: 10px 32px;
+  background: #4a90d9;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-close-modal:hover { opacity: .85; }
+
+/* Scenario box */
+.scenario-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 18px;
+  border: 1px solid #dce6f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  margin-bottom: 4px;
+}
+.scenario-box h3 { font-size: .88rem; color: #4a90d9; margin-bottom: 6px; }
+.scenario-box p { font-size: .83rem; color: #555; }
+
+/* Responsive */
+@media (max-width: 860px) {
+  .main-container { flex-direction: column; }
+  .right-panel { position: static; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 디지털 리터러시 수행평가 — 한국 전통 음식 소개 카드 만들기</h1>
+  <p>성취기준: AI 도구 및 생성형 AI 등을 활용하여 목적에 맞게 창의적인 콘텐츠를 생산한다. (D1-7)</p>
+</div>
+
+<div class="main-container">
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="scenario-box">
+      <h3>📌 과제 상황</h3>
+      <p>학교 영어 동아리에서 외국인 중학생에게 보낼 <strong>"한국 전통 음식 소개 카드"</strong>를 생성형 AI를 활용하여 만들려고 합니다. 아래 설정 패널에서 옵션을 선택하여 소개 카드를 완성하세요.</p>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="step-card open active" id="step1">
+      <div class="step-header" onclick="toggleStep(1)">
+        <span class="step-badge" id="badge1">STEP 1</span>
+        <span class="step-title">이미지 생성 설정</span>
+        <span class="step-chevron">▼</span>
+      </div>
+      <div class="step-body">
+        <div class="field">
+          <label>🍽️ 음식 선택</label>
+          <select id="foodSelect" onchange="onSettingChange()">
+            <option value="">-- 선택하세요 --</option>
+            <option value="bibimbap">비빔밥</option>
+            <option value="bulgogi">불고기</option>
+            <option value="tteokbokki">떡볶이</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>🎨 이미지 스타일</label>
+          <select id="styleSelect" onchange="onSettingChange()">
+            <option value="">-- 선택하세요 --</option>
+            <option value="photo">사진풍</option>
+            <option value="watercolor">수채화</option>
+            <option value="cartoon">만화풍</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>🖼️ 배경</label>
+          <select id="bgSelect" onchange="onSettingChange()">
+            <option value="">-- 선택하세요 --</option>
+            <option value="white">흰색 배경</option>
+            <option value="hanok">한옥 배경</option>
+            <option value="table">식탁 배경</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-card" id="step2">
+      <div class="step-header" onclick="toggleStep(2)">
+        <span class="step-badge" id="badge2">STEP 2</span>
+        <span class="step-title">텍스트 생성 설정</span>
+        <span class="step-chevron">▼</span>
+      </div>
+      <div class="step-body">
+        <div class="field">
+          <label>🌐 언어</label>
+          <select id="langSelect" onchange="onSettingChange()">
+            <option value="">-- 선택하세요 --</option>
+            <option value="en">English</option>
+            <option value="ko">Korean</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>💬 톤</label>
+          <select id="toneSelect" onchange="onSettingChange()">
+            <option value="">-- 선택하세요 --</option>
+            <option value="friendly">친근한</option>
+            <option value="formal">격식있는</option>
+            <option value="humorous">유머러스한</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>📝 포함할 정보 (복수 선택 가능)</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" value="ingredients" onchange="onSettingChange()"><span>재료</span></label>
+            <label><input type="checkbox" value="taste" onchange="onSettingChange()"><span>맛 설명</span></label>
+            <label><input type="checkbox" value="origin" onchange="onSettingChange()"><span>음식 유래</span></label>
+            <label><input type="checkbox" value="howto" onchange="onSettingChange()"><span>먹는 방법</span></label>
+            <label><input type="checkbox" value="calorie" onchange="onSettingChange()"><span>칼로리</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step-card" id="step3">
+      <div class="step-header" onclick="toggleStep(3)">
+        <span class="step-badge" id="badge3">STEP 3</span>
+        <span class="step-title">레이아웃 설정</span>
+        <span class="step-chevron">▼</span>
+      </div>
+      <div class="step-body">
+        <div class="field">
+          <label>📐 카드 배치</label>
+          <div class="radio-group">
+            <label><input type="radio" name="layout" value="top" onchange="onSettingChange()" checked> 이미지 상단 + 텍스트 하단</label>
+            <label><input type="radio" name="layout" value="lr" onchange="onSettingChange()"> 좌우 분할</label>
+            <label><input type="radio" name="layout" value="overlay" onchange="onSettingChange()"> 이미지 배경 + 텍스트 오버레이</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>🔤 글꼴 크기</label>
+          <select id="fontSizeSelect" onchange="onSettingChange()">
+            <option value="sm">작게</option>
+            <option value="md" selected>보통</option>
+            <option value="lg">크게</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-card" id="step4">
+      <div class="step-header" onclick="toggleStep(4)">
+        <span class="step-badge" id="badge4">STEP 4</span>
+        <span class="step-title">AI 생성 텍스트 검토 및 수정</span>
+        <span class="step-chevron">▼</span>
+      </div>
+      <div class="step-body">
+        <button class="btn-generate" id="btnGenerate" onclick="generateText()">
+          <span class="btn-text">✨ AI 텍스트 생성하기</span>
+          <span class="spinner"></span>
+        </button>
+        <div class="generated-text-area" id="generatedTextArea">
+          <p style="font-size:.8rem;color:#7f9bb8;margin-bottom:10px;">💡 밑줄 친 부분을 클릭하여 더 적절한 표현을 선택하세요.</p>
+          <div id="generatedTextContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="preview-container">
+      <div class="preview-header">👁️ 카드 미리보기</div>
+      <div class="preview-body" id="previewBody">
+        <div class="preview-placeholder" id="previewPlaceholder">
+          <div class="icon">🃏</div>
+          <div>왼쪽 패널에서 설정을 선택하면<br>여기에 미리보기가 표시됩니다.</div>
+        </div>
+        <div class="card-preview layout-top" id="cardPreview" style="display:none;">
+          <div class="card-image-section bg-white" id="cardImage">
+            <span class="food-emoji" id="foodEmoji">🍚</span>
+            <span class="style-label" id="styleLabel">사진풍</span>
+          </div>
+          <div class="card-text-section" id="cardText">
+            <div class="card-title fs-md" id="cardTitle">Food Title</div>
+            <div class="card-body fs-md" id="cardBody">설정을 완성하고 텍스트를 생성하면 여기에 내용이 표시됩니다.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="submit-bar">
+  <button class="btn-submit" onclick="submitAssessment()">📮 제출하기</button>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header"><h2>📊 채점 결과</h2></div>
+    <div class="modal-score">
+      <div class="score-number" id="totalScore">0</div>
+      <div class="score-total">/ 7점</div>
+    </div>
+    <div class="modal-details" id="modalDetails"></div>
+    <div class="modal-footer">
+      <button class="btn-close-modal" onclick="closeModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const foodData = {
+  bibimbap: {
+    emoji: '🍚',
+    titleEn: 'Bibimbap',
+    titleKo: '비빔밥',
+    texts: {
+      before: `Bibimbap is a traditional Korean dish that literally means 'mixed rice.' It features a colorful arrangement of vegetables, meat, and a fried egg on top of rice. The dish is `,
+      slot1default: 'typically served in a cold bowl',
+      mid1: ' to keep the ingredients fresh. You can ',
+      slot2default: 'mixing all the ingredients',
+      mid2: ' with gochujang (Korean chili paste) for a spicy kick. Bibimbap is not only delicious but also ',
+      slot3default: 'a well-balanced meal',
+      after: ' rich in nutrients.'
+    },
+    slots: [
+      {
+        id: 'slot1',
+        original: 'typically served in a cold bowl',
+        options: [
+          { text: 'typically served in a hot stone bowl', correct: true },
+          { text: 'usually served on a flat plate', correct: false },
+          { text: '원문 유지', correct: false, isKeep: true }
+        ]
+      },
+      {
+        id: 'slot2',
+        original: 'mixing all the ingredients',
+        options: [
+          { text: 'mix all the ingredients', correct: true },
+          { text: '원문 유지', correct: false, isKeep: true },
+          { text: 'to mix all the ingredients', correct: false }
+        ]
+      },
+      {
+        id: 'slot3',
+        original: 'a well-balanced meal',
+        options: [
+          { text: 'an expensive luxury food', correct: false },
+          { text: 'a very common street food', correct: false },
+          { text: '원문 유지', correct: true, isKeep: true }
+        ]
+      }
+    ]
+  },
+  bulgogi: {
+    emoji: '🥩',
+    titleEn: 'Bulgogi',
+    titleKo: '불고기',
+    texts: {
+      before: `Bulgogi, which means 'fire meat,' is one of Korea's most `,
+      slot1default: 'famous breakfast dishes',
+      mid1: '. Thinly sliced beef is marinated in a sweet and savory sauce made with soy sauce, garlic, and pear juice. The meat is then ',
+      slot2default: 'grilled to perfection',
+      mid2: ', creating a tender and flavorful dish. Bulgogi is often ',
+      slot3default: 'wrapping in lettuce leaves',
+      after: ' with rice and garlic for a delightful bite.'
+    },
+    slots: [
+      {
+        id: 'slot1',
+        original: 'famous breakfast dishes',
+        options: [
+          { text: 'beloved main dishes', correct: true },
+          { text: 'popular dessert items', correct: false },
+          { text: '원문 유지', correct: false, isKeep: true }
+        ]
+      },
+      {
+        id: 'slot2',
+        original: 'grilled to perfection',
+        options: [
+          { text: 'boiled in water', correct: false },
+          { text: 'frozen overnight', correct: false },
+          { text: '원문 유지', correct: true, isKeep: true }
+        ]
+      },
+      {
+        id: 'slot3',
+        original: 'wrapping in lettuce leaves',
+        options: [
+          { text: 'wrapped in lettuce leaves', correct: true },
+          { text: '원문 유지', correct: false, isKeep: true },
+          { text: 'to wrapping in lettuce leaves', correct: false }
+        ]
+      }
+    ]
+  },
+  tteokbokki: {
+    emoji: '🌶️',
+    titleEn: 'Tteokbokki',
+    titleKo: '떡볶이',
+    texts: {
+      before: `Tteokbokki is a popular Korean street food made with chewy rice cakes and `,
+      slot1default: 'a mild cream sauce',
+      mid1: '. This iconic dish is loved by people of all ages for its ',
+      slot2default: 'spicy and sweet flavor',
+      mid2: '. Street vendors across Korea ',
+      slot3default: 'sells this comforting snack',
+      after: ' especially during the cold winter months. It is often enjoyed with fish cakes and boiled eggs as side ingredients.'
+    },
+    slots: [
+      {
+        id: 'slot1',
+        original: 'a mild cream sauce',
+        options: [
+          { text: 'a spicy red chili paste sauce', correct: true },
+          { text: 'a sour lemon dressing', correct: false },
+          { text: '원문 유지', correct: false, isKeep: true }
+        ]
+      },
+      {
+        id: 'slot2',
+        original: 'spicy and sweet flavor',
+        options: [
+          { text: 'bitter and salty taste', correct: false },
+          { text: 'sour and bland flavor', correct: false },
+          { text: '원문 유지', correct: true, isKeep: true }
+        ]
+      },
+      {
+        id: 'slot3',
+        original: 'sells this comforting snack',
+        options: [
+          { text: 'sell this comforting snack', correct: true },
+          { text: '원문 유지', correct: false, isKeep: true },
+          { text: 'selling this comforting snack', correct: false }
+        ]
+      }
+    ]
+  }
+};
+
+// Valid image combos for "소개 카드" (most are valid; exclude some odd ones)
+const validImageCombos = new Set([
+  'bibimbap-photo-white', 'bibimbap-photo-hanok', 'bibimbap-photo-table',
+  'bibimbap-watercolor-white', 'bibimbap-watercolor-hanok', 'bibimbap-watercolor-table',
+  'bibimbap-cartoon-white', 'bibimbap-cartoon-table',
+  'bulgogi-photo-white', 'bulgogi-photo-hanok', 'bulgogi-photo-table',
+  'bulgogi-watercolor-white', 'bulgogi-watercolor-hanok', 'bulgogi-watercolor-table',
+  'bulgogi-cartoon-white', 'bulgogi-cartoon-table',
+  'tteokbokki-photo-white', 'tteokbokki-photo-hanok', 'tteokbokki-photo-table',
+  'tteokbokki-watercolor-white', 'tteokbokki-watercolor-hanok', 'tteokbokki-watercolor-table',
+  'tteokbokki-cartoon-white', 'tteokbokki-cartoon-table'
+]);
+
+const styleLabels = { photo: '📷 사진풍', watercolor: '🎨 수채화', cartoon: '✏️ 만화풍' };
+const bgClasses = { white: 'bg-white', hanok: 'bg-hanok', table: 'bg-table' };
+
+// ===== STATE =====
+let slotSelections = { slot1: null, slot2: null, slot3: null };
+let textGenerated = false;
+let currentFood = null;
+
+// ===== STEP ACCORDION =====
+function toggleStep(n) {
+  const card = document.getElementById('step' + n);
+  card.classList.toggle('open');
+}
+
+// ===== SETTINGS CHANGE =====
+function onSettingChange() {
+  updatePreview();
+  // If text was generated and food changed, reset generated text
+  const food = document.getElementById('foodSelect').value;
+  if (textGenerated && food !== currentFood) {
+    textGenerated = false;
+    document.getElementById('generatedTextArea').classList.remove('visible');
+    slotSelections = { slot1: null, slot2: null, slot3: null };
+  }
+}
+
+// ===== UPDATE PREVIEW =====
+function updatePreview() {
+  const food = document.getElementById('foodSelect').value;
+  const style = document.getElementById('styleSelect').value;
+  const bg = document.getElementById('bgSelect').value;
+  const layout = document.querySelector('input[name="layout"]:checked')?.value || 'top';
+  const fontSize = document.getElementById('fontSizeSelect').value;
+
+  const placeholder = document.getElementById('previewPlaceholder');
+  const card = document.getElementById('cardPreview');
+
+  if (!food) {
+    placeholder.style.display = '';
+    card.style.display = 'none';
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  card.style.display = '';
+
+  const fd = foodData[food];
+
+  // Emoji & style
+  document.getElementById('foodEmoji').textContent = fd.emoji;
+  document.getElementById('styleLabel').textContent = style ? styleLabels[style] || '' : '';
+
+  // Background
+  const imgSection = document.getElementById('cardImage');
+  imgSection.className = 'card-image-section ' + (bg ? bgClasses[bg] : 'bg-white');
+
+  // Layout
+  card.className = 'card-preview';
+  if (layout === 'top') card.classList.add('layout-top');
+  else if (layout === 'lr') card.classList.add('layout-lr');
+  else if (layout === 'overlay') card.classList.add('layout-overlay');
+
+  // Font size
+  const title = document.getElementById('cardTitle');
+  const body = document.getElementById('cardBody');
+  title.className = 'card-title fs-' + fontSize;
+  body.className = 'card-body fs-' + fontSize;
+
+  // Title
+  title.textContent = fd.titleEn;
+
+  // Body text
+  if (textGenerated && food === currentFood) {
+    body.textContent = buildPlainText(fd);
+  } else {
+    body.textContent = 'AI 텍스트를 생성하면 여기에 내용이 표시됩니다.';
+  }
+}
+
+function buildPlainText(fd) {
+  const t = fd.texts;
+  const s1 = getSlotDisplayText(fd, 0);
+  const s2 = getSlotDisplayText(fd, 1);
+  const s3 = getSlotDisplayText(fd, 2);
+  return t.before + s1 + t.mid1 + s2 + t.mid2 + s3 + t.after;
+}
+
+function getSlotDisplayText(fd, idx) {
+  const slot = fd.slots[idx];
+  const sel = slotSelections[slot.id];
+  if (sel === null) return slot.original;
+  const opt = slot.options[sel];
+  return opt.isKeep ? slot.original : opt.text;
+}
+
+// ===== GENERATE TEXT =====
+function generateText() {
+  const food = document.getElementById('foodSelect').value;
+  if (!food) { alert('음식을 먼저 선택해주세요.'); return; }
+
+  const btn = document.getElementById('btnGenerate');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+
+    currentFood = food;
+    textGenerated = true;
+    slotSelections = { slot1: null, slot2: null, slot3: null };
+
+    renderGeneratedText(food);
+    document.getElementById('generatedTextArea').classList.add('visible');
+    updatePreview();
+
+    // Auto open step4
+    document.getElementById('step4').classList.add('open');
+  }, 1500);
+}
+
+function renderGeneratedText(food) {
+  const fd = foodData[food];
+  const t = fd.texts;
+  const container = document.getElementById('generatedTextContent');
+
+  container.innerHTML = '';
+
+  const p = document.createElement('p');
+  p.style.lineHeight = '2';
+
+  p.appendChild(text(t.before));
+  p.appendChild(createSlotSpan(fd, 0));
+  p.appendChild(text(t.mid1));
+  p.appendChild(createSlotSpan(fd, 1));
+  p.appendChild(text(t.mid2));
+  p.appendChild(createSlotSpan(fd, 2));
+  p.appendChild(text(t.after));
+
+  container.appendChild(p);
+}
+
+function text(str) { return document.createTextNode(str); }
+
+function createSlotSpan(fd, idx) {
+  const slot = fd.slots[idx];
+  const span = document.createElement('span');
+  span.className = 'underline-slot';
+  span.id = 'span-' + slot.id;
+  span.textContent = slot.original;
+  span.style.position = 'relative';
+
+  // Dropdown
+  const dd = document.createElement('div');
+  dd.className = 'ul-dropdown';
+  dd.id = 'dd-' + slot.id;
+
+  slot.options.forEach((opt, oi) => {
+    const item = document.createElement('div');
+    item.className = 'ul-dropdown-item';
+    item.textContent = opt.isKeep ? ('원문 유지: "' + slot.original + '"') : opt.text;
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectSlotOption(fd, idx, oi);
+      dd.classList.remove('show');
+    });
+    dd.appendChild(item);
+  });
+
+  span.appendChild(dd);
+
+  span.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // Close others
+    document.querySelectorAll('.ul-dropdown.show').forEach(d => { if (d !== dd) d.classList.remove('show'); });
+    dd.classList.toggle('show');
+  });
+
+  return span;
+}
+
+function selectSlotOption(fd, slotIdx, optIdx) {
+  const slot = fd.slots[slotIdx];
+  slotSelections[slot.id] = optIdx;
+
+  const span = document.getElementById('span-' + slot.id);
+  const opt = slot.options[optIdx];
+  span.childNodes[0].textContent = opt.isKeep ? slot.original : opt.text;
+  span.classList.add('selected');
+
+  // Update dropdown active state
+  const dd = document.getElementById('dd-' + slot.id);
+  dd.querySelectorAll('.ul-dropdown-item').forEach((item, i) => {
+    item.classList.toggle('active', i === optIdx);
+  });
+
+  updatePreview();
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', () => {
+  document.querySelectorAll('.ul-dropdown.show').forEach(d => d.classList.remove('show'));
+});
+
+// ===== SCORING =====
+function submitAssessment() {
+  const food = document.getElementById('foodSelect').value;
+  const style = document.getElementById('styleSelect').value;
+  const bg = document.getElementById('bgSelect').value;
+  const lang = document.getElementById('langSelect').value;
+  const tone = document.getElementById('toneSelect').value;
+  const checks = Array.from(document.querySelectorAll('.checkbox-group input:checked')).map(c => c.value);
+
+  let score = 0;
+  const details = [];
+
+  // 1. Language = English
+  const langOk = lang === 'en';
+  if (langOk) score++;
+  details.push({ label: '언어 설정 (English)', ok: langOk, desc: langOk ? 'English 선택 ✓' : (lang ? 'Korean 선택' : '미선택') });
+
+  // 2. Tone = friendly or humorous
+  const toneOk = tone === 'friendly' || tone === 'humorous';
+  if (toneOk) score++;
+  details.push({ label: '톤 적합성 (친근/유머)', ok: toneOk, desc: toneOk ? '적합한 톤 선택 ✓' : (tone === 'formal' ? '격식있는 톤 선택' : '미선택') });
+
+  // 3. Info includes 2+ of [ingredients, taste, howto]
+  const infoTargets = ['ingredients', 'taste', 'howto'];
+  const infoCount = checks.filter(c => infoTargets.includes(c)).length;
+  const infoOk = infoCount >= 2;
+  if (infoOk) score++;
+  details.push({ label: '포함 정보 (핵심 2개↑)', ok: infoOk, desc: infoOk ? `핵심 정보 ${infoCount}개 선택 ✓` : `핵심 정보 ${infoCount}개 선택` });
+
+  // 4. Image combo
+  const comboKey = food + '-' + style + '-' + bg;
+  const comboOk = validImageCombos.has(comboKey);
+  if (comboOk) score++;
+  details.push({ label: '이미지 설정 적합성', ok: comboOk, desc: comboOk ? '적합한 조합 ✓' : (!food || !style || !bg ? '미완성 설정' : '부적합한 조합') });
+
+  // 5-7. Slots
+  const slotLabels = ['밑줄1 수정', '밑줄2 수정', '밑줄3 판단'];
+  if (food && foodData[food]) {
+    foodData[food].slots.forEach((slot, i) => {
+      const sel = slotSelections[slot.id];
+      const ok = sel !== null && slot.options[sel].correct;
+      if (ok) score++;
+      let desc = '미선택';
+      if (sel !== null) {
+        const opt = slot.options[sel];
+        desc = ok ? '정답 ✓' : `"${opt.isKeep ? '원문 유지' : opt.text}" 선택`;
+      }
+      details.push({ label: slotLabels[i], ok, desc });
+    });
+  } else {
+    slotLabels.forEach(l => details.push({ label: l, ok: false, desc: '텍스트 미생성' }));
+  }
+
+  // Show modal
+  document.getElementById('totalScore').textContent = score;
+  const detailsContainer = document.getElementById('modalDetails');
+  detailsContainer.innerHTML = details.map(d =>
+    `<div class="score-row">
+      <span class="label">${d.label}</span>
+      <span class="result ${d.ok ? 'correct' : 'wrong'}">${d.desc}</span>
+    </div>`
+  ).join('');
+
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// Close modal on overlay click
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Initial state
+updatePreview();
+</script>
+</body>
+</html>
